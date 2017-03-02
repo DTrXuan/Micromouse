@@ -3,8 +3,8 @@ using UnityEngine;
 using UnityEditor;
 using System.Collections;
 using System.Linq;
-using UnityEngine.UI;
-using Random = UnityEngine.Random;
+using UnityEditor.SceneManagement;
+using UnityEngine.SceneManagement;
 
 public class MazeSolver : MonoBehaviour
 {
@@ -53,7 +53,7 @@ public class MazeSolver : MonoBehaviour
 	
 	private bool pauseSolve;
 	private bool pauseRun;
-	private Algorithm algorithmInUse;
+	public Algorithm algorithmInUse;
 	private int x, y;
 	
 	private Vector2 mazeSize, endSize;
@@ -84,6 +84,7 @@ public class MazeSolver : MonoBehaviour
 		
 		GameObject.FindGameObjectsWithTag("Wall").ToList().ForEach(go => go.GetComponent<Renderer>().material.color = Color.white);
 		GameObject.FindGameObjectsWithTag("Ground").ToList().ForEach(go => go.GetComponent<Renderer>().material.color = Color.black);
+		GameObject.FindGameObjectsWithTag("End").ToList().ForEach(go => go.GetComponent<Renderer>().material.color = Color.gray);
 
 		x = 0;
 		y = 0;
@@ -202,15 +203,13 @@ public class MazeSolver : MonoBehaviour
 
 	private void UpdateTransform()
 	{
-		var wallDelta = wallDimensions.x - wallDimensions.z;
+		var wallDelta = wallDimensions.x;
 
 		Vector3 position = Vector3.zero;
-		position += new Vector3(0, 0, wallDelta);
+		position += new Vector3(1, 0, 1) * (wallDimensions.x + wallDimensions.z) / 2;
 		position += Vector3.up * wallDimensions.y;
-
 		position += Vector3.forward * y * wallDelta;
 		position += Vector3.right * x * wallDelta;
-		//position += Vector3.up * 0.03f;
 
 		int index = Array.IndexOf(Enum.GetValues(typeof(MouseOrientation)), orientation);
 		var rotation = Quaternion.Euler(0, 90 * (int) index, 0);
@@ -317,14 +316,23 @@ public class MazeSolver : MonoBehaviour
 			var solver = (MazeSolver) target;
 
 			solver.stepTime = EditorGUILayout.Slider(new GUIContent("Step Time (s)"), solver.stepTime, 0.01f, 1f);
-
+			
 			GUI.enabled = !solving && !running;
 			solver.algorithm = (Algorithm) EditorGUILayout.EnumPopup(new GUIContent("Algorithm"), solver.algorithm);
 
 			solver.sensorDetectionLength = EditorGUILayout.Slider(new GUIContent("Sensor Detection (m)"), solver.sensorDetectionLength, 0.01f, 0.30f);
+			
 
 			if (!Application.isPlaying)
+			{
+				if(GUI.changed)
+				{
+					EditorUtility.SetDirty(solver);
+					EditorSceneManager.MarkSceneDirty(solver.gameObject.scene);
+				}
+				
 				return;
+			}
 
 			GUI.enabled = !running;
 			if (!solving)

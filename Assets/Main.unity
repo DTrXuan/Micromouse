@@ -281,7 +281,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   stepTime: 0.25
   algorithm: 0
-  sensorDetectionLength: 0.01
+  sensorDetectionLength: 0.15
+  algorithmInUse: 0
 --- !u!1 &1465386568
 GameObject:
   m_ObjectHideFlags: 0
