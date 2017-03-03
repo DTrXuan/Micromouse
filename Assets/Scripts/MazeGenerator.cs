@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class MazeGenerator
 {
-	class Coord
+	public class Coord
 	{
 		public int x, y;
 
