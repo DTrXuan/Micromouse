@@ -474,7 +474,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   MazeSize: {x: 16, y: 16}
-  WallDimensions: {x: 0.18, y: 0.05, z: 0.012}
+  WallDimensions: {x: 0.168, y: 0.05, z: 0.012}
+  PillarDimensions: {x: 0.012, y: 0.05, z: 0.012}
   EndSize: {x: 2, y: 2}
 --- !u!4 &1866858357
 Transform:

@@ -22,8 +22,16 @@ public class MazeSolver : MonoBehaviour
 		}
 	}
 
-	private FloodCell[,] floodFill;
+	private enum FloodStatus
+	{
+		None,
+		Find,
+		Return
+	}
+	
 	private MazeGenerator.Cell previousCell;
+	private FloodCell[,] floodFill;
+	private FloodStatus floodStatus;
 
 	public enum Algorithm
 	{
@@ -74,7 +82,7 @@ public class MazeSolver : MonoBehaviour
 	private int x, y;
 	
 	private Vector2 mazeSize, endSize;
-	private Vector3 wallDimensions;
+	private Vector3 wallDimensions, pillarDimensions;
 
 	private bool forceMove;
 
@@ -91,6 +99,7 @@ public class MazeSolver : MonoBehaviour
 		mazeSize = mazeBuilder.MazeSize;
 		endSize = mazeBuilder.EndSize;
 		wallDimensions = mazeBuilder.WallDimensions;
+		pillarDimensions = mazeBuilder.PillarDimensions;
 
 		cells = new MazeGenerator.Cell[(int) mazeSize.x, (int) mazeSize.y];
 		for(y = 0; y < (int) mazeSize.y; y++)
@@ -137,8 +146,9 @@ public class MazeSolver : MonoBehaviour
 	{
 		int columns = (int) mazeSize.x; 
 		int rows = (int) mazeSize.y; 
-
 		floodFill = new FloodCell[columns, rows];
+		floodStatus = FloodStatus.Find;
+		
 		for (int y = 0; y < rows; y++)
 		{
 			for (int x = 0; x < columns; x++)
@@ -148,15 +158,10 @@ public class MazeSolver : MonoBehaviour
 		}
 		
 		previousCell = null;
-		RecalculateFloodFill();
 	}
 
-	private void RecalculateFloodFill()
+	private MazeGenerator.Coord[] GetEndCells()
 	{
-		var currentStack = new Queue<MazeGenerator.Coord>();
-		var nextStack = new Queue<MazeGenerator.Coord>();
-		int currentFloodValue = 0;
-		
 		int columns = (int) mazeSize.x; 
 		int rows = (int) mazeSize.y; 
 		int endColumns = (int) endSize.x; 
@@ -165,14 +170,31 @@ public class MazeSolver : MonoBehaviour
 		int x0 = columns / 2 - endColumns / 2;
 		int y0 = rows / 2 - endRows / 2;
 
+		var cells = new MazeGenerator.Coord[endColumns * endRows];
+
 		// Add end cells to the stack
+		int i = 0;
+
 		for (int xAux = 0; xAux < endColumns; xAux++)
 		{
 			for (int yAux = 0; yAux < endRows; yAux++)
 			{
-				nextStack.Enqueue(new MazeGenerator.Coord(x0 + xAux, y0 + yAux));
+				cells[i] = new MazeGenerator.Coord(x0 + xAux, y0 + yAux);
+				i++;
 			}
 		}
+
+		return cells;
+	}
+
+	private void CalculateFloodFill(params MazeGenerator.Coord[] targetCells)
+	{
+		var currentStack = new Queue<MazeGenerator.Coord>();
+		var nextStack = new Queue<MazeGenerator.Coord>();
+		int currentFloodValue = 0;
+		
+		int columns = (int) mazeSize.x; 
+		int rows = (int) mazeSize.y;
 
 		for (int y = 0; y < rows; y++)
 		{
@@ -181,6 +203,9 @@ public class MazeSolver : MonoBehaviour
 				floodFill[y, x].visited = false;
 			}
 		}
+
+		for (int i = 0; i < targetCells.Length; i++)
+			nextStack.Enqueue(targetCells[i]);
 
 		while (nextStack.Count > 0)
 		{
@@ -299,20 +324,27 @@ public class MazeSolver : MonoBehaviour
 	
 	private void FloodFillStep()
 	{
+		var groundTag = DetectGround(paint: false);
+
+		if (groundTag == "End")
+			floodStatus = FloodStatus.Return;
+		
+		if (floodStatus == FloodStatus.Find)
+			CalculateFloodFill(GetEndCells());
+		else if (floodStatus == FloodStatus.Return)
+			CalculateFloodFill(new MazeGenerator.Coord(0, 0));
+
 		var front = orientation;
 		var left = GetOrientation(orientation, -1);
 		var right = GetOrientation(orientation, 1);
 		
-		var currentStack = new Queue<MazeGenerator.Coord>();
-		var currentFlood = floodFill[x, y];
-		int deltaRotation = 0;
+		int deltaRotation = 1;
 
 		var hasFrontWall = cells[x, y].HasWall(GetWallFromMouseOrientation(front));
 		var hasLeftWall = cells[x, y].HasWall(GetWallFromMouseOrientation(left));
 		var hasRightWall = cells[x, y].HasWall(GetWallFromMouseOrientation(right));
 		
 		int lowestFlood = Int32.MaxValue;
-		MazeGenerator.Cell nextCell = null;
 
 		MazeGenerator.Cell cell = null;
 
@@ -323,7 +355,6 @@ public class MazeSolver : MonoBehaviour
 			if (adjacentFlood < lowestFlood)
 			{
 				lowestFlood = adjacentFlood;
-				nextCell = cell;
 				deltaRotation = 0;
 			}
 		}
@@ -335,7 +366,6 @@ public class MazeSolver : MonoBehaviour
 			if (adjacentFlood < lowestFlood)
 			{
 				lowestFlood = adjacentFlood;
-				nextCell = cell;
 				deltaRotation = -1;
 			}
 		}
@@ -347,7 +377,6 @@ public class MazeSolver : MonoBehaviour
 			if (adjacentFlood < lowestFlood)
 			{
 				lowestFlood = adjacentFlood;
-				nextCell = cell;
 				deltaRotation = 1;
 			}
 		}
@@ -358,7 +387,6 @@ public class MazeSolver : MonoBehaviour
 			if (adjacentFlood < lowestFlood)
 			{
 				lowestFlood = adjacentFlood;
-				nextCell = previousCell;
 				deltaRotation = -2;
 			}
 		}
@@ -367,7 +395,6 @@ public class MazeSolver : MonoBehaviour
 
 		Rotate(deltaRotation);
 		MoveForward();
-		RecalculateFloodFill();
 	}
 
 	private MazeGenerator.Cell GetAdjacentCell(MouseOrientation orientation)
@@ -421,10 +448,11 @@ public class MazeSolver : MonoBehaviour
 
 	private void UpdateTransform()
 	{
-		var wallDelta = wallDimensions.x;
+		var wallDelta = wallDimensions.x + pillarDimensions.x;
 
 		Vector3 position = Vector3.zero;
-		position += new Vector3(1, 0, 1) * (wallDimensions.x + wallDimensions.z) / 2;
+		position += new Vector3(1, 0, 1) * wallDimensions.x / 2;
+		position += new Vector3(1, 0, 1) * (pillarDimensions.x + pillarDimensions.z) / 2;
 		position += Vector3.up * wallDimensions.y;
 		position += Vector3.forward * y * wallDelta;
 		position += Vector3.right * x * wallDelta;
@@ -444,23 +472,33 @@ public class MazeSolver : MonoBehaviour
 		var left = GetOrientation(orientation, -1);
 		var right = GetOrientation(orientation, 1);
 		
-		DetectGround();
+		DetectGround(paint: true);
 		DetectWall(front);
 		DetectWall(left);
 		DetectWall(right);
 	}
 	
-	private void DetectGround()
+	private String DetectGround(bool paint)
 	{
+		String groundTag = null;
+
 		var ray = new Ray(transform.position, -transform.up);
 		var hitInfo = new RaycastHit();
 		if (Physics.Raycast(ray, out hitInfo))
 		{
 			if (hitInfo.transform.tag == "Ground")
-				hitInfo.transform.GetComponent<Renderer>().material.color = Color.Lerp(Color.black, Color.red, 0.2f);
+			{
+				if(paint) hitInfo.transform.GetComponent<Renderer>().material.color = Color.Lerp(Color.black, Color.red, 0.2f);
+				groundTag = "Ground";
+			}
 			else if (hitInfo.transform.tag == "End")
-				hitInfo.transform.GetComponent<Renderer>().material.color = Color.Lerp(Color.black, Color.red, 0.5f);
+			{
+				if(paint) hitInfo.transform.GetComponent<Renderer>().material.color = Color.Lerp(Color.black, Color.red, 0.5f);
+				groundTag = "End";
+			}
 		}
+		
+		return groundTag;
 	}
 
 	private void DetectWall(MouseOrientation orientation)

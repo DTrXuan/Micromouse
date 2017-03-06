@@ -6,6 +6,7 @@ public class MazeBuilder : MonoBehaviour
 {
 	public Vector2 MazeSize;
 	public Vector3 WallDimensions;
+	public Vector3 PillarDimensions;
 	public Vector2 EndSize;
 
 	private float wallDelta;
@@ -13,7 +14,7 @@ public class MazeBuilder : MonoBehaviour
 
 	private GameObject horizontalWallPrimitive;
 	private GameObject verticalWallPrimitive;
-	private GameObject pinWallPrimitive;
+	private GameObject pillarPrimitive;
 	private GameObject groundPrimitive;
 	private GameObject endPrimitive;
 
@@ -35,7 +36,7 @@ public class MazeBuilder : MonoBehaviour
 	{
 		Camera.main.transform.position = originalCameraPosition;
 		
-		wallDelta = WallDimensions.x;
+		wallDelta = WallDimensions.x + PillarDimensions.x;
 
 		horizontalWallPrimitive = GameObject.CreatePrimitive(PrimitiveType.Cube);
 		horizontalWallPrimitive.transform.localScale = new Vector3(WallDimensions.x, WallDimensions.y, WallDimensions.z);
@@ -47,8 +48,13 @@ public class MazeBuilder : MonoBehaviour
 		verticalWallPrimitive.name = "Wall";
 		verticalWallPrimitive.tag = "Wall";
 
+		pillarPrimitive = GameObject.CreatePrimitive(PrimitiveType.Cube);
+		pillarPrimitive.transform.localScale = new Vector3(WallDimensions.z, WallDimensions.y, WallDimensions.z);
+		pillarPrimitive.name = "Pillar";
+		pillarPrimitive.tag = "Pillar";
+
 		groundPrimitive = GameObject.CreatePrimitive(PrimitiveType.Cube);
-		groundPrimitive.transform.localScale = new Vector3(WallDimensions.x, 0.1f, WallDimensions.x);
+		groundPrimitive.transform.localScale = new Vector3(WallDimensions.x + PillarDimensions.x, 0.1f, WallDimensions.x + PillarDimensions.z);
 		groundPrimitive.GetComponent<Renderer>().material.color = Color.black;
 		groundPrimitive.name = "Ground";
 		groundPrimitive.tag = "Ground";
@@ -72,61 +78,66 @@ public class MazeBuilder : MonoBehaviour
 		maze = generator.GenerateMaze();
 
 		Vector3 horizontalOriginPosition = Vector3.zero;
-		horizontalOriginPosition += new Vector3(WallDimensions.x / 2, 0, WallDimensions.z / 2);
+		horizontalOriginPosition += new Vector3(WallDimensions.x/ 2 + PillarDimensions.x, 0, WallDimensions.z / 2);
 		horizontalOriginPosition += Vector3.up * WallDimensions.y;
-
+		
 		Vector3 verticalOriginPosition = Vector3.zero;
-		verticalOriginPosition += new Vector3(WallDimensions.z / 2, 0, -WallDimensions.x / 2);
+		verticalOriginPosition += new Vector3(WallDimensions.z / 2, 0, WallDimensions.x / 2 + PillarDimensions.x);
 		verticalOriginPosition += Vector3.up * WallDimensions.y;
+
+		Vector3 pillarOriginPosition = Vector3.zero;
+		pillarOriginPosition += new Vector3(PillarDimensions.z / 2, 0, PillarDimensions.x / 2);
+		pillarOriginPosition += Vector3.up * PillarDimensions.y;
 
 		for(int y = 0; y < MazeSize.y; y++)
 		{
-			bool previousHasNorth = false;
-
 			for(int x = 0; x < MazeSize.x; x++)
 			{
+				var newPillar = Instantiate(pillarPrimitive);
+				newPillar.transform.position = pillarOriginPosition + Vector3.forward * wallDelta * y;
+				newPillar.transform.position += Vector3.right * wallDelta * x;
+				newPillar.transform.parent = transform;
+
 				if ((maze[x,y].walls & MazeGenerator.Wall.West) != 0)
 				{
 					var newWall = Instantiate(verticalWallPrimitive);
-					newWall.transform.position = verticalOriginPosition + Vector3.forward * wallDelta * (y+1);
+					newWall.transform.position = verticalOriginPosition + Vector3.forward * wallDelta * y;
 					newWall.transform.position += Vector3.right * wallDelta * x;
-					if (previousHasNorth)
-					{
-						newWall.transform.position += Vector3.forward * WallDimensions.z / 2;
-						newWall.transform.localScale += Vector3.forward * WallDimensions.z;
-						previousHasNorth = false;
-					}
 					newWall.transform.parent = transform;
 				}
 				
-				if((maze[x,y].walls & MazeGenerator.Wall.North) != 0)
+				if((maze[x,y].walls & MazeGenerator.Wall.South) != 0)
 				{
-					previousHasNorth = true;
 					var newWall = Instantiate(horizontalWallPrimitive);
 					newWall.transform.position = horizontalOriginPosition + Vector3.right * wallDelta * x;
-					newWall.transform.position += Vector3.forward * wallDelta * (y+1);
+					newWall.transform.position += Vector3.forward * wallDelta * y;
 					newWall.transform.parent = transform;
 				}
 
 				if(x == MazeSize.x - 1) // Last East
 				{
 					var newWall = Instantiate(verticalWallPrimitive);
-					newWall.transform.position = verticalOriginPosition + Vector3.forward * wallDelta * (y+1);;
+					newWall.transform.position = verticalOriginPosition + Vector3.forward * wallDelta * y;
 					newWall.transform.position += Vector3.right * wallDelta * (x+1);
 					newWall.transform.parent = transform;
 
-					if (y == MazeSize.y - 1) // Top right
-					{
-						newWall.transform.position += Vector3.forward * WallDimensions.z / 2;
-						newWall.transform.localScale += Vector3.forward * WallDimensions.z;
-					}
+					newPillar = Instantiate(pillarPrimitive);
+					newPillar.transform.position = pillarOriginPosition + Vector3.forward * wallDelta * y;
+					newPillar.transform.position += Vector3.right * wallDelta * (x+1);
+					newPillar.transform.parent = transform;
 				}
 				
-				if(y == 0) // Last South
+				if(y == MazeSize.y - 1) // Last North
 				{
 					var newWall = Instantiate(horizontalWallPrimitive);
 					newWall.transform.position = horizontalOriginPosition + Vector3.right * wallDelta * x;
+					newWall.transform.position += Vector3.forward * wallDelta * (y+1);
 					newWall.transform.parent = transform;
+					
+					newPillar = Instantiate(pillarPrimitive);
+					newPillar.transform.position = pillarOriginPosition + Vector3.forward * wallDelta * (y+1);
+					newPillar.transform.position += Vector3.right * wallDelta * x;
+					newPillar.transform.parent = transform;
 				}
 				
 				var ground = Instantiate(groundPrimitive);
@@ -166,6 +177,7 @@ public class MazeBuilder : MonoBehaviour
 	{
 		Destroy(horizontalWallPrimitive);
 		Destroy(verticalWallPrimitive);
+		Destroy(pillarPrimitive);
 		Destroy(groundPrimitive);
 		Destroy(endPrimitive);
 	}

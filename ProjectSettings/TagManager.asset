@@ -7,6 +7,7 @@ TagManager:
   - Wall
   - End
   - Ground
+  - Pillar
   layers:
   - Default
   - TransparentFX
