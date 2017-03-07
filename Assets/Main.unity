@@ -473,10 +473,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 657c67e4457717a408227c1862f4f3c4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  MazeSize: {x: 16, y: 16}
-  WallDimensions: {x: 0.168, y: 0.05, z: 0.012}
-  PillarDimensions: {x: 0.012, y: 0.05, z: 0.012}
-  EndSize: {x: 2, y: 2}
+  _mazeSize: {x: 16, y: 16}
+  _wallDimensions: {x: 0.168, y: 0.05, z: 0.012}
+  _pillarDimensions: {x: 0.012, y: 0.05, z: 0.012}
+  _endSize: {x: 2, y: 2}
+  _endDelta: {x: 0, y: 0}
 --- !u!4 &1866858357
 Transform:
   m_ObjectHideFlags: 0
