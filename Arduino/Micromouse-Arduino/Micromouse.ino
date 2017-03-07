@@ -42,19 +42,23 @@ int sensorsCalibrationMax[NUM_SENSORS];
 const int DURATION_CALIBRATION_SECONDS = 5;
 
 bool pause = false;
-bool forcedPause = true;
+bool forcedPause = false;
 const int DELAY_PAUSE_SECONDS = 3;
 
-bool connectedToSerial = true;
+bool connectedToSerial = false;
 const int CONNECTION_MAX_RETRIES = 5;
 const int DELAY_CONNECTION = 500;
 
-bool debugSensors = true;
+bool debugSensors = false;
 
 void setup() {
-	Serial.begin(9600);
-	while (!Serial);
-	delay(1);
+	if(connectedToSerial)
+	{
+		Serial.begin(9600);
+		while (!Serial);
+		delay(1);
+	}
+
 	// while the serial stream is not open, do nothing
 
 	Serial.println("setup() started...");
@@ -96,6 +100,8 @@ void loop() {
 
 		Serial.println("Resume!");
 	}
+
+	RandomTest();
 
 	return;
 
@@ -290,6 +296,7 @@ void RandomTest() {
 	mouse.goForward(100);
 	mouse.run();
 
+	forcedPause = true;
 	Serial.print("Test took ");
 	Serial.print(millis() - startTime);
 	Serial.println("ms.");

@@ -47,8 +47,8 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..\..\Documents\Arduino\libraries\AccelStepper\src;$(ProjectDir)..\..\..\..\Documents\Arduino\libraries\MMKIT;C:\Program Files (x86)\Arduino\libraries;C:\Program Files (x86)\Arduino\hardware\arduino\avr\libraries;$(ProjectDir)..\..\..\..\Documents\Arduino\libraries;C:\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino;C:\Program Files (x86)\Arduino\hardware\arduino\avr\variants\leonardo;$(ProjectDir)..\Micromouse;C:\Program Files (x86)\Arduino\hardware\tools\avr\avr\include\;C:\Program Files (x86)\Arduino\hardware\tools\avr\avr\include\avr\;C:\Program Files (x86)\Arduino\hardware\tools\avr\lib\gcc\avr\4.8.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <ForcedIncludeFiles>$(ProjectDir)__vm\.Micromouse.vsarduino.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..\..\Documents\Arduino\libraries\AccelStepper\src;$(ProjectDir)..\..\..\..\Documents\Arduino\libraries\MMKIT;$(ProjectDir)..\..\..\..\..\..\Program Files (x86)\Arduino\libraries;$(ProjectDir)..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\arduino\avr\libraries;$(ProjectDir)..\..\..\..\Documents\Arduino\libraries;$(ProjectDir)..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino;$(ProjectDir)..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\arduino\avr\variants\leonardo;$(ProjectDir)..\Micromouse-Arduino;$(ProjectDir)..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\tools\avr\avr\include\;$(ProjectDir)..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\tools\avr\avr\include\avr\;$(ProjectDir)..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\tools\avr\lib\gcc\avr\4.8.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <ForcedIncludeFiles>$(ProjectDir)__vm\.Micromouse-Arduino.vsarduino.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
       <IgnoreStandardIncludePath>false</IgnoreStandardIncludePath>
       <PreprocessorDefinitions>__AVR_ATmega32u4__;__AVR_ATmega32U4__;_VMDEBUG=1;F_CPU=16000000L;ARDUINO=10801;ARDUINO_AVR_LEONARDO;ARDUINO_ARCH_AVR;USB_VID=0x2341;USB_PID=0x8036;__cplusplus=201103L;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
@@ -59,10 +59,14 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <Optimization>MaxSpeed</Optimization>
+      <Optimization>Disabled</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..\..\Documents\Arduino\libraries\AccelStepper\src;$(ProjectDir)..\..\..\..\Documents\Arduino\libraries\MMKIT;$(ProjectDir)..\..\..\..\..\..\Program Files (x86)\Arduino\libraries;$(ProjectDir)..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\arduino\avr\libraries;$(ProjectDir)..\..\..\..\Documents\Arduino\libraries;$(ProjectDir)..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino;$(ProjectDir)..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\arduino\avr\variants\leonardo;$(ProjectDir)..\Micromouse-Arduino;$(ProjectDir)..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\tools\avr\avr\include\;$(ProjectDir)..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\tools\avr\avr\include\avr\;$(ProjectDir)..\..\..\..\..\..\Program Files (x86)\Arduino\hardware\tools\avr\lib\gcc\avr\4.8.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <ForcedIncludeFiles>$(ProjectDir)__vm\.Micromouse-Arduino.vsarduino.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
+      <PreprocessorDefinitions>__AVR_ATmega32u4__;__AVR_ATmega32U4__;F_CPU=16000000L;ARDUINO=10801;ARDUINO_AVR_LEONARDO;ARDUINO_ARCH_AVR;USB_VID=0x2341;USB_PID=0x8036;__cplusplus=201103L;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -82,6 +86,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="__vm\.Micromouse-Arduino.vsarduino.h" />
     <ClInclude Include="__vm\.Micromouse.vsarduino.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
