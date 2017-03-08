@@ -515,6 +515,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d6ce462c176fed4469d6d0de7aa719b8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isEditing: 0
+  distanceToWallThreshold: 0.055
 --- !u!1 &2146653019
 GameObject:
   m_ObjectHideFlags: 0
