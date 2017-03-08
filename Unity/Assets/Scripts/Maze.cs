@@ -65,8 +65,8 @@ public static class Maze {
 	{
 		None = 0,
 		North = 1 << 0, // 1
-		South = 1 << 1, // 2
-		East  = 1 << 2, // 4
+		East  = 1 << 1, // 2
+		South = 1 << 2, // 4
 		West  = 1 << 3, // 8
 		All   = North | South | East | West // 15
 	}
@@ -108,6 +108,39 @@ public static class Maze {
 				return Maze.Wall.South;
 
 		return Maze.Wall.None;
+	}
+
+	public static void Clear()
+	{
+		Maze.Cells = new Maze.Cell[Maze.MazeSize.x, Maze.MazeSize.y];
+		for (int y = 0; y < Maze.MazeSize.y; ++y)
+		{
+			for (int x = 0; x < Maze.MazeSize.x; ++x)
+			{
+				Maze.Cells[x, y] = new Maze.Cell(x, y, Maze.Wall.None);
+
+				if (x == 0)
+				{
+					Maze.Cells[x, y].InsertWall(Maze.Wall.West);
+				}
+
+				if (y == 0)
+				{
+					Maze.Cells[x, y].InsertWall(Maze.Wall.South);
+				}
+
+				
+				if (x == Maze.MazeSize.x - 1)
+				{
+					Maze.Cells[x, y].InsertWall(Maze.Wall.East);
+
+				}
+				if (y == Maze.MazeSize.y - 1)
+				{
+					Maze.Cells[x, y].InsertWall(Maze.Wall.North);
+				}
+			}
+		}
 	}
 
 	public static Cell[,] Cells;

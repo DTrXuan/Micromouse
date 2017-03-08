@@ -29,12 +29,18 @@ public class MazeBuilder : MonoBehaviour
 		originalCameraPosition = Camera.main.transform.position;
 	}
 
-	public void Start()
+	void Start()
 	{
 		SetupValues();
-		Initialize();
 		GenerateMaze();
 		Dipose();
+	}
+
+	void Clear()
+	{
+		SetupValues();
+		Maze.Clear();
+		Render();
 	}
 	
 	void Initialize()
@@ -66,7 +72,7 @@ public class MazeBuilder : MonoBehaviour
 		
 		endPrimitive = GameObject.CreatePrimitive(PrimitiveType.Cube);
 		endPrimitive.transform.localScale = new Vector3(Maze.EndSize.x * wallDelta, 0.1f, Maze.EndSize.y * wallDelta);
-		endPrimitive.GetComponent<Renderer>().material.color = Color.Lerp(Color.black, Color.gray, 0.33f);
+		endPrimitive.GetComponent<Renderer>().material.color = Color.gray;
 		endPrimitive.name = "End";
 		endPrimitive.tag = "End";
 	}
@@ -82,11 +88,25 @@ public class MazeBuilder : MonoBehaviour
 
 	void GenerateMaze()
 	{
-		foreach(Transform child in transform)
-			Destroy(child.gameObject);
-
 		var generator = new MazeGenerator();
 		generator.GenerateMaze();
+
+		MazeSerializer.ResetMazeName();
+	
+		Render();
+	}
+
+	public void Render()
+	{
+		Initialize();
+		DrawMaze();
+		Dipose();
+	}
+
+	void DrawMaze()
+	{
+		foreach(Transform child in transform)
+			Destroy(child.gameObject);
 
 		Vector3 horizontalOriginPosition = Vector3.zero;
 		horizontalOriginPosition += new Vector3(Maze.WallDimensions.x/ 2 + Maze.PillarDimensions.x, 0, Maze.WallDimensions.z / 2);
@@ -138,7 +158,7 @@ public class MazeBuilder : MonoBehaviour
 					newPillar.transform.parent = transform;
 				}
 				
-				if(y == Maze. MazeSize.y - 1) // Last North
+				if(y == Maze.MazeSize.y - 1) // Last North
 				{
 					var newWall = Instantiate(horizontalWallPrimitive);
 					newWall.transform.position = horizontalOriginPosition + Vector3.right * wallDelta * x;
@@ -149,6 +169,14 @@ public class MazeBuilder : MonoBehaviour
 					newPillar.transform.position = pillarOriginPosition + Vector3.forward * wallDelta * (y+1);
 					newPillar.transform.position += Vector3.right * wallDelta * x;
 					newPillar.transform.parent = transform;
+
+					if(x == Maze.MazeSize.x - 1) // Last East
+					{
+						newPillar = Instantiate(pillarPrimitive);
+						newPillar.transform.position = pillarOriginPosition + Vector3.forward * wallDelta * (y+1);
+						newPillar.transform.position += Vector3.right * wallDelta * (x+1);
+						newPillar.transform.parent = transform;
+					}
 				}
 				
 				var ground = Instantiate(groundPrimitive);
@@ -199,16 +227,24 @@ public class MazeBuilder : MonoBehaviour
 		public override void OnInspectorGUI()
 		{
 			base.OnInspectorGUI();
-			
-			if(!Application.isPlaying)
-				return;
+
+			GUI.enabled = Application.isPlaying;
 
 			MazeBuilder builder = (MazeBuilder) target;
 			
-			if (GUILayout.Button("Generate"))
+			GUILayout.BeginHorizontal();
 			{
-				builder.Start();
+				if (GUILayout.Button("Clear"))
+				{
+					builder.Clear();
+				}
+
+				if (GUILayout.Button("Generate"))
+				{
+					builder.Start();
+				}
 			}
+			GUILayout.EndHorizontal();
 		}
 	}
 }

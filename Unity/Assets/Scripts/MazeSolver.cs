@@ -33,10 +33,16 @@ public class MazeSolver : MonoBehaviour
 	private FloodCell[,] floodFill;
 	private FloodStatus floodStatus;
 
-	public enum Algorithm
+	public enum ExploreAlgorithm
 	{
 		RightWall,
 		FloodFill,
+		ModifiedFloodFill,
+	}
+	
+	public enum RunAlgorithm
+	{
+		TBD
 	}
 
 	[Flags]
@@ -69,15 +75,15 @@ public class MazeSolver : MonoBehaviour
 	}
 
 	public float stepTime;
-	public Algorithm algorithm;
+	public ExploreAlgorithm exploreAlgorithm;
+	public RunAlgorithm runAlgorithm;
 	public float sensorDetectionLength;
 
 	private MouseOrientation orientation;
 	private Maze.Cell[,] cells;
 	
-	private bool pauseSolve;
+	private bool pauseExplore;
 	private bool pauseRun;
-	public Algorithm algorithmInUse;
 	private int x, y;
 
 	private bool forceMove;
@@ -113,21 +119,20 @@ public class MazeSolver : MonoBehaviour
 		UpdateTransform();
 	}
 
-	public void Solve()
+	public void Explore()
 	{
 		Reset();
 
-		algorithmInUse = algorithm;
-		pauseSolve = false;
+		pauseExplore = false;
 
-		switch (algorithmInUse)
+		switch (exploreAlgorithm)
 		{
-			case Algorithm.FloodFill:
+			case ExploreAlgorithm.FloodFill:
 				SetupFloodFill();
 				break;
 		}
 
-		StartCoroutine(StepSolve());
+		StartCoroutine(StepExplore());
 	}
 
 	private void SetupFloodFill()
@@ -228,30 +233,38 @@ public class MazeSolver : MonoBehaviour
 		}
 	}
 
-	private IEnumerator StepSolve()
+	private IEnumerator StepExplore()
 	{
-		yield return new WaitWhile(() => pauseSolve);
+		yield return new WaitWhile(() => pauseExplore);
 
 		TouchCell();
 
-		switch (algorithmInUse)
+		if (forceMove)
 		{
-			case Algorithm.RightWall:
-				RightWallStep();
-				break;
+			MoveForward();
+			forceMove = false;
+		}
+		else
+		{
+			switch (exploreAlgorithm)
+			{
+				case ExploreAlgorithm.RightWall:
+					RightWallStep();
+					break;
 
-			case Algorithm.FloodFill:
-				FloodFillStep();
-				break;
+				case ExploreAlgorithm.FloodFill:
+					FloodFillStep();
+					break;
+			}
 		}
 
 		UpdateTransform();
 
 		yield return new WaitForSeconds(stepTime);
-		yield return StartCoroutine(StepSolve());
+		yield return StartCoroutine(StepExplore());
 	}
 	
-	private void StopSolve()
+	private void StopExplore()
 	{
 		StopAllCoroutines();
 	}
@@ -281,13 +294,6 @@ public class MazeSolver : MonoBehaviour
 		var hasFrontWall = cells[x, y].HasWall(front);
 		var hasRightWall = cells[x, y].HasWall(right);
 
-		if (forceMove)
-		{
-			MoveForward();
-			forceMove = false;
-			return;
-		}
-
 		if (!hasRightWall)
 		{
 			Rotate(1);
@@ -312,7 +318,7 @@ public class MazeSolver : MonoBehaviour
 		else if (groundTag == "Start" && floodStatus == FloodStatus.Return)
 		{
 			floodStatus = FloodStatus.Finished;
-			pauseSolve = true;
+			pauseExplore = true;
 			return;
 		}
 
@@ -381,7 +387,7 @@ public class MazeSolver : MonoBehaviour
 		previousCell = cells[x, y];
 
 		Rotate(deltaRotation);
-		MoveForward();
+		forceMove = true;
 	}
 
 	private Maze.Cell GetAdjacentCell(MouseOrientation orientation)
@@ -551,80 +557,86 @@ public class MazeSolver : MonoBehaviour
 	{
 		StopCoroutine(StepRun());	
 	}
+	
+	private bool exploring;
+	private bool running;
 
 	[CustomEditor(typeof(MazeSolver))]
 	private class MazeSolverEditor : Editor
 	{
-		private bool solving;
-		private bool running;
-
 		public override void OnInspectorGUI()
 		{
 			var solver = (MazeSolver) target;
 
 			solver.stepTime = EditorGUILayout.Slider(new GUIContent("Step Time (s)"), solver.stepTime, 0.01f, 1f);
-			
-			GUI.enabled = !solving && !running;
-			solver.algorithm = (Algorithm) EditorGUILayout.EnumPopup(new GUIContent("Algorithm"), solver.algorithm);
-
-			solver.sensorDetectionLength = EditorGUILayout.Slider(new GUIContent("Sensor Detection (m)"), solver.sensorDetectionLength, 0.01f, 0.30f);
-			
-
-			if (!Application.isPlaying)
 			{
-				if(GUI.changed)
-				{
-					EditorUtility.SetDirty(solver);
-					EditorSceneManager.MarkSceneDirty(solver.gameObject.scene);
-				}
-				
-				return;
+				EditorGUILayout.Space();
 			}
 
-			GUI.enabled = !running;
-			if (!solving)
+			GUI.enabled = !solver.exploring && !solver.running;
+			solver.sensorDetectionLength = EditorGUILayout.Slider(new GUIContent("Sensor Detection (m)"), solver.sensorDetectionLength, 0.01f, 0.30f);
+
 			{
-				if (GUILayout.Button("Solve"))
+				EditorGUILayout.Space();
+			}
+			
+			GUI.enabled = !Application.isPlaying || !solver.exploring;
+			solver.exploreAlgorithm = (ExploreAlgorithm) EditorGUILayout.EnumPopup(new GUIContent("Explore Algorithm"), solver.exploreAlgorithm);
+			
+			GUI.enabled = Application.isPlaying && !solver.running;
+			if (!solver.exploring)
+			{
+				if (GUILayout.Button("Explore"))
 				{
-					solver.pauseSolve = false;
-					solver.Solve();
-					solving = true;
+					solver.pauseExplore = false;
+					solver.Explore();
+					solver.exploring = true;
 				}
 			}
 			else
 			{
 				GUILayout.BeginHorizontal();
 				{
-					if (!solver.pauseSolve)
+					if (!solver.pauseExplore)
 					{
-						if (GUILayout.Button("Pause solve"))
-							solver.pauseSolve = true;
+						if (GUILayout.Button("Pause explore"))
+							solver.pauseExplore = true;
 					}
 					else
 					{
-						if (GUILayout.Button("Resume solve"))
-							solver.pauseSolve = false;
+						if (GUILayout.Button("Resume explore"))
+							solver.pauseExplore = false;
 					}
 
-					if (GUILayout.Button("Stop solve"))
+					if (GUILayout.Button("Stop explore"))
 					{
-						solver.pauseSolve = true;
-						solving = false;
-						solver.StopSolve();
+						solver.pauseExplore = true;
+						solver.exploring = false;
+						solver.StopExplore();
 						solver.Reset();
 					}
 				}
 				GUILayout.EndHorizontal();
 			}
 
-			GUI.enabled = !solving;
-			if (!running)
+			GUI.enabled = Application.isPlaying && !solver.exploring;
+
+			{
+				EditorGUILayout.Space();
+			}
+			
+			GUI.enabled = !Application.isPlaying || !solver.running;
+			solver.runAlgorithm = (RunAlgorithm) EditorGUILayout.EnumPopup(new GUIContent("Run Algorithm"), solver.runAlgorithm);
+
+			GUI.enabled = Application.isPlaying && !solver.exploring;
+
+			if (!solver.running)
 			{
 				if (GUILayout.Button("Run"))
 				{
 					solver.pauseRun = false;
 					solver.StepRun();
-					running = true;
+					solver.running = true;
 				}
 			}
 			else
@@ -647,12 +659,21 @@ public class MazeSolver : MonoBehaviour
 					if (GUILayout.Button("Stop run"))
 					{
 						solver.pauseRun = true;
-						running = false;
+						solver.running = false;
 						solver.StopRun();
 						solver.Reset();
 					}
 				}
 				GUILayout.EndHorizontal();
+			}
+
+			if (!Application.isPlaying)
+			{
+				if(GUI.changed)
+				{
+					EditorUtility.SetDirty(solver);
+					EditorSceneManager.MarkSceneDirty(solver.gameObject.scene);
+				}
 			}
 		}
 	}

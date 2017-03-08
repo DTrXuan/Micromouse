@@ -280,9 +280,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   stepTime: 0.25
-  algorithm: 1
+  exploreAlgorithm: 1
+  runAlgorithm: 0
   sensorDetectionLength: 0.15
-  algorithmInUse: 0
 --- !u!1 &1465386568
 GameObject:
   m_ObjectHideFlags: 0
@@ -455,6 +455,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1866858357}
   - component: {fileID: 1866858356}
+  - component: {fileID: 1866858358}
+  - component: {fileID: 1866858359}
   m_Layer: 0
   m_Name: Maze
   m_TagString: Untagged
@@ -491,6 +493,28 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1866858358
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1866858355}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bcb2d455cf180574caa31c399a0d4b0b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1866858359
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1866858355}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d6ce462c176fed4469d6d0de7aa719b8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2146653019
 GameObject:
   m_ObjectHideFlags: 0
