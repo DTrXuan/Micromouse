@@ -149,12 +149,34 @@ public static class Maze {
 	public static Coord EndDelta;
 	public static Vector3 PillarDimensions, WallDimensions;
 
-	public static void GetEndPosition(out int x0, out int y0)
+	public static Coord GetEndCoord()
 	{		
-		x0 = (Maze.MazeSize.x - Maze.EndSize.x + 1) / 2 + Maze.EndDelta.x;
-		y0 = (Maze.MazeSize.y - Maze.EndSize.y + 1) / 2 + Maze.EndDelta.y;
+		int x = (Maze.MazeSize.x - Maze.EndSize.x + 1) / 2 + Maze.EndDelta.x;
+		int y = (Maze.MazeSize.y - Maze.EndSize.y + 1) / 2 + Maze.EndDelta.y;
 
-		x0 = Math.Max(0, Math.Min(x0, Maze.MazeSize.x - Maze.EndSize.x));
-		y0 = Math.Max(0, Math.Min(y0, Maze.MazeSize.y - Maze.EndSize.y));
+		x = Math.Max(0, Math.Min(x, Maze.MazeSize.x - Maze.EndSize.x));
+		y = Math.Max(0, Math.Min(y, Maze.MazeSize.y - Maze.EndSize.y));
+
+		return new Coord(x, y);
+	}
+
+	public static Coord[] GetEndCells()
+	{
+		var coords = new Maze.Coord[Maze.EndSize.x * Maze.EndSize.y];
+
+		var endCoord = Maze.GetEndCoord();
+
+		int i = 0;
+
+		for (int xAux = 0; xAux < Maze.EndSize.x; xAux++)
+		{
+			for (int yAux = 0; yAux < Maze.EndSize.y; yAux++)
+			{
+				coords[i] = new Maze.Coord(endCoord.x + xAux, endCoord.y + yAux);
+				i++;
+			}
+		}
+
+		return coords;
 	}
 }

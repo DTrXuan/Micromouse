@@ -13,6 +13,8 @@ public class MazeBuilder : MonoBehaviour
 	private GameObject groundPrimitive;
 	private GameObject endPrimitive;
 
+	public GameObject groundPrefab;
+
 	[SerializeField]
 	private Vector2 _mazeSize;
 	[SerializeField]
@@ -64,7 +66,7 @@ public class MazeBuilder : MonoBehaviour
 		pillarPrimitive.name = "Pillar";
 		pillarPrimitive.tag = "Pillar";
 
-		groundPrimitive = GameObject.CreatePrimitive(PrimitiveType.Cube);
+		groundPrimitive = GameObject.Instantiate(groundPrefab);
 		groundPrimitive.transform.localScale = new Vector3(Maze.WallDimensions.x + Maze.PillarDimensions.x, 0.1f, Maze.WallDimensions.x + Maze.PillarDimensions.z);
 		groundPrimitive.GetComponent<Renderer>().material.color = Color.black;
 		groundPrimitive.name = "Ground";
@@ -187,7 +189,7 @@ public class MazeBuilder : MonoBehaviour
 				ground.transform.position += Vector3.forward * wallDelta / 2;
 				ground.transform.position += Vector3.down * Maze.WallDimensions.y / 2;
 				ground.transform.parent = transform;
-
+				ground.name = x + "," + y;
 				if (x == 0 && y == 0)
 				{
 					ground.tag = "Start";
@@ -195,13 +197,12 @@ public class MazeBuilder : MonoBehaviour
 			}
 		}
 		
-		int x0, y0;
-		Maze.GetEndPosition(out x0, out y0);
+		var endCoord = Maze.GetEndCoord();
 
 		var end = Instantiate(endPrimitive);
-		end.transform.position += Vector3.right * wallDelta * x0;
+		end.transform.position += Vector3.right * wallDelta * endCoord.x;
 		end.transform.position += Vector3.right * end.transform.localScale.x / 2;
-		end.transform.position += Vector3.forward * wallDelta * y0;
+		end.transform.position += Vector3.forward * wallDelta * endCoord.y;
 		end.transform.position += Vector3.forward * end.transform.localScale.z / 2;
 		end.transform.position += Vector3.down * Maze.WallDimensions.y / 2;
 		end.transform.position += Vector3.up * 0.001f;

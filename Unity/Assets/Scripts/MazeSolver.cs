@@ -12,8 +12,9 @@ public class MazeSolver : MonoBehaviour
 	{
 		public int x;
 		public int y;
-		public bool flooded;
+		public bool queued;
 		public int value;
+		public TextMesh textMesh;
 
 		public FloodCell(int x, int y)
 		{
@@ -28,7 +29,7 @@ public class MazeSolver : MonoBehaviour
 		Return,
 		Finished,
 	}
-	
+
 	private Maze.Cell previousCell;
 	private FloodCell[,] floodFill;
 	private FloodStatus floodStatus;
@@ -84,7 +85,7 @@ public class MazeSolver : MonoBehaviour
 	
 	private bool pauseExplore;
 	private bool pauseRun;
-	private int x, y;
+	private int xPos, yPos;
 
 	private bool forceMove;
 
@@ -96,11 +97,11 @@ public class MazeSolver : MonoBehaviour
 	private void Reset()
 	{
 		cells = new Maze.Cell[Maze.MazeSize.x, Maze.MazeSize.y];
-		for(y = 0; y < Maze.MazeSize.y; y++)
+		for(yPos = 0; yPos < Maze.MazeSize.y; yPos++)
 		{
-			for (x = 0; x < Maze.MazeSize.x; x++)
+			for (xPos = 0; xPos < Maze.MazeSize.x; xPos++)
 			{
-				cells[x, y] = new Maze.Cell(x, y);
+				cells[xPos, yPos] = new Maze.Cell(xPos, yPos);
 			}
 		}
 
@@ -113,8 +114,8 @@ public class MazeSolver : MonoBehaviour
 		GameObject.FindGameObjectsWithTag("Ground").ToList().ForEach(go => go.GetComponent<Renderer>().material.color = Color.black);
 		GameObject.FindGameObjectsWithTag("End").ToList().ForEach(go => go.GetComponent<Renderer>().material.color = Color.gray);
 
-		x = 0;
-		y = 0;
+		xPos = 0;
+		yPos = 0;
 
 		UpdateTransform();
 	}
@@ -130,6 +131,9 @@ public class MazeSolver : MonoBehaviour
 			case ExploreAlgorithm.FloodFill:
 				SetupFloodFill();
 				break;
+			case ExploreAlgorithm.ModifiedFloodFill:
+				SetupModifiedFloodFill();
+				break;
 		}
 
 		StartCoroutine(StepExplore());
@@ -144,33 +148,31 @@ public class MazeSolver : MonoBehaviour
 		{
 			for (int x = 0; x < Maze.MazeSize.x; x++)
 			{
-				floodFill[y, x] = new FloodCell(x, y);
+				floodFill[x, y] = new FloodCell(x, y);
+				floodFill[x, y].textMesh = GameObject.Find(x + "," + y).GetComponentInChildren<TextMesh>();
 			}
 		}
 		
 		previousCell = null;
 	}
-
-	private Maze.Coord[] GetEndCells()
+	
+	private void SetupModifiedFloodFill()
 	{
-		var coords = new Maze.Coord[Maze.EndSize.x * Maze.EndSize.y];
+		floodFill = new FloodCell[Maze.MazeSize.x, Maze.MazeSize.y];
+		floodStatus = FloodStatus.Find;
 
-		int x0, y0;
-		Maze.GetEndPosition(out x0, out y0);
-
-		// Add end cells to the stack
-		int i = 0;
-
-		for (int xAux = 0; xAux < Maze.EndSize.x; xAux++)
+		for (int y = 0; y < Maze.MazeSize.y; y++)
 		{
-			for (int yAux = 0; yAux < Maze.EndSize.y; yAux++)
+			for (int x = 0; x < Maze.MazeSize.x; x++)
 			{
-				coords[i] = new Maze.Coord(x0 + xAux, y0 + yAux);
-				i++;
+				floodFill[x, y] = new FloodCell(x, y);
+				floodFill[x, y].textMesh = GameObject.Find(x + "," + y).GetComponentInChildren<TextMesh>();
 			}
 		}
 
-		return coords;
+		CalculateFloodFill(Maze.GetEndCells());
+		
+		previousCell = null;
 	}
 
 	private void CalculateFloodFill(params Maze.Coord[] targetCells)
@@ -186,7 +188,7 @@ public class MazeSolver : MonoBehaviour
 		{
 			for (int x = 0; x < columns; x++)
 			{
-				floodFill[y, x].flooded = false;
+				floodFill[x, y].queued = false;
 			}
 		}
 
@@ -198,13 +200,12 @@ public class MazeSolver : MonoBehaviour
 			currentStack = new Queue<Maze.Coord>(nextStack);
 			nextStack.Clear();
 
-			int currentStackLength = currentStack.Count;
-			while (currentStackLength > 0)
+			for(int i = 0; i < currentStack.Count; i++)
 			{
-				currentStackLength--;
 				var coord = currentStack.Dequeue();
 				floodFill[coord.x, coord.y].value = currentFloodValue;
-				floodFill[coord.x, coord.y].flooded = true;
+				floodFill[coord.x, coord.y].textMesh.text = "" + currentFloodValue;
+				floodFill[coord.x, coord.y].queued = true;
 				currentStack.Enqueue(coord);
 			}
 
@@ -213,23 +214,97 @@ public class MazeSolver : MonoBehaviour
 				var coord = currentStack.Dequeue();
 
 				// left
-				if (coord.x > 0 && !floodFill[coord.x - 1, coord.y].flooded && !cells[coord.x, coord.y].HasWall(Maze.Wall.West)) 
+				if (coord.x > 0 && !floodFill[coord.x - 1, coord.y].queued && !cells[coord.x, coord.y].HasWall(Maze.Wall.West)) 
 					nextStack.Enqueue(new Maze.Coord(coord.x - 1, coord.y));
 				
 				// right
-				if (coord.x < columns - 1 && !floodFill[coord.x + 1, coord.y].flooded && !cells[coord.x, coord.y].HasWall(Maze.Wall.East)) 
+				if (coord.x < columns - 1 && !floodFill[coord.x + 1, coord.y].queued && !cells[coord.x, coord.y].HasWall(Maze.Wall.East)) 
 					nextStack.Enqueue(new Maze.Coord(coord.x + 1, coord.y));
 
 				// down
-				if (coord.y > 0 && !floodFill[coord.x, coord.y-1].flooded && !cells[coord.x, coord.y].HasWall(Maze.Wall.South)) 
+				if (coord.y > 0 && !floodFill[coord.x, coord.y-1].queued && !cells[coord.x, coord.y].HasWall(Maze.Wall.South)) 
 					nextStack.Enqueue(new Maze.Coord(coord.x, coord.y-1));
 
 				// up
-				if (coord.y < rows - 1 && !floodFill[coord.x, coord.y+1].flooded && !cells[coord.x, coord.y].HasWall(Maze.Wall.North)) 
+				if (coord.y < rows - 1 && !floodFill[coord.x, coord.y+1].queued && !cells[coord.x, coord.y].HasWall(Maze.Wall.North)) 
 					nextStack.Enqueue(new Maze.Coord(coord.x, coord.y+1));
 			}
 
 			currentFloodValue++;
+		}
+	}
+
+	private void CalculateModifiedFloodFill(params Maze.Coord[] targetCells)
+	{
+		var currentStack = new Stack<Maze.Coord>();
+		
+		int columns = (int) Maze.MazeSize.x; 
+		int rows = (int) Maze.MazeSize.y;
+
+		currentStack.Push(new Maze.Coord(xPos, yPos));
+
+		for (int y = 0; y < rows; y++)
+		{
+			for (int x = 0; x < columns; x++)
+			{
+				floodFill[x, x].queued = false;
+			}
+		}
+
+		while (currentStack.Count > 0)
+		{
+			Maze.Coord coord = currentStack.Pop();
+			int neighborMinimumFloodValue = Int32.MaxValue;
+
+			// left
+			if (coord.x > 0 && !cells[coord.x, coord.y].HasWall(Maze.Wall.West))
+				neighborMinimumFloodValue = Math.Min(neighborMinimumFloodValue, floodFill[coord.x - 1, coord.y].value);
+				
+			// right
+			if (coord.x < columns - 1 && !cells[coord.x, coord.y].HasWall(Maze.Wall.East))
+				neighborMinimumFloodValue = Math.Min(neighborMinimumFloodValue, floodFill[coord.x + 1, coord.y].value);
+
+			// down
+			if (coord.y > 0 && !cells[coord.x, coord.y].HasWall(Maze.Wall.South))
+				neighborMinimumFloodValue = Math.Min(neighborMinimumFloodValue, floodFill[coord.x, coord.y - 1].value);
+
+			// up
+			if (coord.y < rows - 1 && !cells[coord.x, coord.y].HasWall(Maze.Wall.North))
+				neighborMinimumFloodValue = Math.Min(neighborMinimumFloodValue, floodFill[coord.x, coord.y + 1].value);
+
+			if (floodFill[xPos, yPos].value != neighborMinimumFloodValue + 1)
+			{
+				floodFill[xPos, yPos].value = neighborMinimumFloodValue + 1;
+				floodFill[coord.x, coord.y].textMesh.text = "" + floodFill[coord.x, coord.y].value;
+				
+				// left
+				if (coord.x > 0 && !floodFill[coord.x - 1, coord.y].queued && !cells[coord.x, coord.y].HasWall(Maze.Wall.West))
+				{
+					currentStack.Push(new Maze.Coord(coord.x - 1, coord.y));
+					floodFill[coord.x - 1, coord.y].queued = true;
+				}
+				
+				// right
+				if (coord.x < columns - 1 && !floodFill[coord.x + 1, coord.y].queued && !cells[coord.x, coord.y].HasWall(Maze.Wall.East)) 
+				{
+					currentStack.Push(new Maze.Coord(coord.x + 1, coord.y));
+					floodFill[coord.x + 1, coord.y].queued = true;
+				}
+
+				// down
+				if (coord.y > 0 && !floodFill[coord.x, coord.y-1].queued && !cells[coord.x, coord.y].HasWall(Maze.Wall.South)) 
+				{
+					currentStack.Push(new Maze.Coord(coord.x, coord.y-1));
+					floodFill[coord.x, coord.y-1].queued = true;
+				}
+
+				// up
+				if (coord.y < rows - 1 && !floodFill[coord.x, coord.y+1].queued && !cells[coord.x, coord.y].HasWall(Maze.Wall.North)) 
+				{
+					currentStack.Push(new Maze.Coord(coord.x, coord.y+1));
+					floodFill[coord.x, coord.y+1].queued = true;
+				}
+			}
 		}
 	}
 
@@ -251,9 +326,13 @@ public class MazeSolver : MonoBehaviour
 				case ExploreAlgorithm.RightWall:
 					RightWallStep();
 					break;
-
+					
 				case ExploreAlgorithm.FloodFill:
 					FloodFillStep();
+					break;
+
+				case ExploreAlgorithm.ModifiedFloodFill:
+					ModifiedFloodFillStep();
 					break;
 			}
 		}
@@ -291,8 +370,8 @@ public class MazeSolver : MonoBehaviour
 		var front = GetWallFromMouseOrientation(orientation);
 		var right = GetWallFromMouseOrientation(GetOrientation(orientation, 1));
 
-		var hasFrontWall = cells[x, y].HasWall(front);
-		var hasRightWall = cells[x, y].HasWall(right);
+		var hasFrontWall = cells[xPos, yPos].HasWall(front);
+		var hasRightWall = cells[xPos, yPos].HasWall(right);
 
 		if (!hasRightWall)
 		{
@@ -323,7 +402,7 @@ public class MazeSolver : MonoBehaviour
 		}
 
 		if (floodStatus == FloodStatus.Find)
-			CalculateFloodFill(GetEndCells());
+			CalculateFloodFill(Maze.GetEndCells());
 		else if (floodStatus == FloodStatus.Return)
 			CalculateFloodFill(new Maze.Coord(0, 0));
 
@@ -333,9 +412,9 @@ public class MazeSolver : MonoBehaviour
 		
 		int deltaRotation = 1;
 
-		var hasFrontWall = cells[x, y].HasWall(GetWallFromMouseOrientation(front));
-		var hasLeftWall = cells[x, y].HasWall(GetWallFromMouseOrientation(left));
-		var hasRightWall = cells[x, y].HasWall(GetWallFromMouseOrientation(right));
+		var hasFrontWall = cells[xPos, yPos].HasWall(GetWallFromMouseOrientation(front));
+		var hasLeftWall = cells[xPos, yPos].HasWall(GetWallFromMouseOrientation(left));
+		var hasRightWall = cells[xPos, yPos].HasWall(GetWallFromMouseOrientation(right));
 		
 		int lowestFlood = Int32.MaxValue;
 
@@ -384,7 +463,89 @@ public class MazeSolver : MonoBehaviour
 			}
 		}
 
-		previousCell = cells[x, y];
+		previousCell = cells[xPos, yPos];
+
+		Rotate(deltaRotation);
+		forceMove = true;
+	}
+
+	
+	private void ModifiedFloodFillStep()
+	{
+		var groundTag = DetectGround(paint: false);
+
+		if (groundTag == "End" && floodStatus == FloodStatus.Find)
+			floodStatus = FloodStatus.Return;
+		else if (groundTag == "Start" && floodStatus == FloodStatus.Return)
+		{
+			floodStatus = FloodStatus.Finished;
+			pauseExplore = true;
+			return;
+		}
+
+		if (floodStatus == FloodStatus.Find)
+			CalculateModifiedFloodFill(Maze.GetEndCells());
+		else if (floodStatus == FloodStatus.Return)
+			CalculateModifiedFloodFill(new Maze.Coord(0, 0));
+
+		var front = orientation;
+		var left = GetOrientation(orientation, -1);
+		var right = GetOrientation(orientation, 1);
+		
+		int deltaRotation = 1;
+
+		var hasFrontWall = cells[xPos, yPos].HasWall(GetWallFromMouseOrientation(front));
+		var hasLeftWall = cells[xPos, yPos].HasWall(GetWallFromMouseOrientation(left));
+		var hasRightWall = cells[xPos, yPos].HasWall(GetWallFromMouseOrientation(right));
+		
+		int lowestFlood = Int32.MaxValue;
+
+		Maze.Cell cell = null;
+
+		cell = GetAdjacentCell(front);
+		if (!hasFrontWall && cell != null)
+		{
+			var adjacentFlood = floodFill[cell.x, cell.y].value;
+			if (adjacentFlood < lowestFlood)
+			{
+				lowestFlood = adjacentFlood;
+				deltaRotation = 0;
+			}
+		}
+		
+		cell = GetAdjacentCell(left);
+		if (!hasLeftWall && cell != null)
+		{
+			var adjacentFlood = floodFill[cell.x, cell.y].value;
+			if (adjacentFlood < lowestFlood)
+			{
+				lowestFlood = adjacentFlood;
+				deltaRotation = -1;
+			}
+		}
+
+		cell = GetAdjacentCell(right);
+		if (!hasRightWall && cell != null)
+		{
+			var adjacentFlood = floodFill[cell.x, cell.y].value;
+			if (adjacentFlood < lowestFlood)
+			{
+				lowestFlood = adjacentFlood;
+				deltaRotation = 1;
+			}
+		}
+		
+		if (previousCell != null)
+		{
+			var adjacentFlood = floodFill[previousCell.x, previousCell.y].value;
+			if (adjacentFlood < lowestFlood)
+			{
+				lowestFlood = adjacentFlood;
+				deltaRotation = -2;
+			}
+		}
+
+		previousCell = cells[xPos, yPos];
 
 		Rotate(deltaRotation);
 		forceMove = true;
@@ -392,8 +553,8 @@ public class MazeSolver : MonoBehaviour
 
 	private Maze.Cell GetAdjacentCell(MouseOrientation orientation)
 	{
-		int xNew = x;
-		int yNew = y;
+		int xNew = xPos;
+		int yNew = yPos;
 
 		int length = 1;
 
@@ -422,20 +583,20 @@ public class MazeSolver : MonoBehaviour
 	{
 		if ((orientation & MouseOrientation.North) != 0)
 		{
-			y += length;
+			yPos += length;
 		}
 		else if ((orientation & MouseOrientation.South) != 0)
 		{
-			y -= length;
+			yPos -= length;
 		}
 
 		if ((orientation & MouseOrientation.East) != 0)
 		{
-			x += length;
+			xPos += length;
 		}
 		else if ((orientation & MouseOrientation.West) != 0)
 		{
-			x -= length;
+			xPos -= length;
 		}
 	}
 
@@ -447,8 +608,8 @@ public class MazeSolver : MonoBehaviour
 		position += new Vector3(1, 0, 1) * Maze.WallDimensions.x / 2;
 		position += new Vector3(1, 0, 1) * (Maze.PillarDimensions.x + Maze.PillarDimensions.z) / 2;
 		position += Vector3.up * Maze.WallDimensions.y;
-		position += Vector3.forward * y * wallDelta;
-		position += Vector3.right * x * wallDelta;
+		position += Vector3.forward * yPos * wallDelta;
+		position += Vector3.right * xPos * wallDelta;
 
 		int index = Array.IndexOf(Enum.GetValues(typeof(MouseOrientation)), orientation);
 		var rotation = Quaternion.Euler(0, 90 * (int) index, 0);
@@ -459,7 +620,7 @@ public class MazeSolver : MonoBehaviour
 
 	private void TouchCell()
 	{
-		cells[x, y].visited = true;
+		cells[xPos, yPos].visited = true;
 
 		var front = orientation;
 		var left = GetOrientation(orientation, -1);
@@ -503,9 +664,9 @@ public class MazeSolver : MonoBehaviour
 	{
 		var wall = GetWallFromMouseOrientation(orientation);
 
-		if (Maze.Cells[x, y].HasWall(wall))
+		if (Maze.Cells[xPos, yPos].HasWall(wall))
 		{
-			cells[x, y].InsertWall(wall);
+			cells[xPos, yPos].InsertWall(wall);
 
 			var adjacentCell = GetAdjacentCell(orientation);
 			if(adjacentCell != null) 
@@ -567,6 +728,8 @@ public class MazeSolver : MonoBehaviour
 		public override void OnInspectorGUI()
 		{
 			var solver = (MazeSolver) target;
+
+			GUI.enabled = true;
 
 			solver.stepTime = EditorGUILayout.Slider(new GUIContent("Step Time (s)"), solver.stepTime, 0.01f, 1f);
 			{

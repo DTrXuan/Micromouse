@@ -93,14 +93,13 @@ public class MazeGenerator
 		Maze.Coord auxCurrentCell, auxNextCell;
 		Maze.Wall auxWall;
 
-		int x0, y0;
-		Maze.GetEndPosition(out x0, out y0);
+		var endCoord = Maze.GetEndCoord();
 
 		for(int xAux = 0; xAux < Maze.EndSize.x; xAux++)
 		{
 			for(int yAux = 0; yAux < Maze.EndSize.y - 1; yAux++)
 			{
-				currentCell = new Maze.Coord(x0 + xAux, y0 + yAux);
+				currentCell = new Maze.Coord(endCoord.x + xAux, endCoord.y + yAux);
 				auxCurrentCell = currentCell; auxNextCell = new Maze.Coord(currentCell.x, currentCell.y + 1);
 
 				auxWall = Maze.GetWallBetween(auxCurrentCell, auxNextCell);
@@ -116,7 +115,7 @@ public class MazeGenerator
 		{
 			for(int yAux = 0; yAux < Maze.EndSize.y; yAux++)
 			{
-				currentCell = new Maze.Coord(x0 + xAux, y0 + yAux);
+				currentCell = new Maze.Coord(endCoord.x + xAux, endCoord.y + yAux);
 				auxCurrentCell = currentCell; auxNextCell = new Maze.Coord(currentCell.x + 1, currentCell.y);
 
 				auxWall = Maze.GetWallBetween(auxCurrentCell, auxNextCell);
