@@ -30,6 +30,10 @@ namespace Constants
 
 	const int SENSOR_READ_MICROSECONDS = 5;
 
+	const int WHEEL_SPACING_MM = 81; // mm
+	const int WHEEL_RADIUS_MM = 31; // mm
+	const int WHEEL_STEPS_PER_REVOLUTION = 200;
+
 	const bool connectedToSerial = false;
 }
 

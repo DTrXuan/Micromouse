@@ -1,6 +1,7 @@
 ﻿#include <Arduino.h>
 #include "SerialInterface.h"
 #include "Config.h"
+#include "Mouse.h"
 
 void SerialInterface::Read()
 {
@@ -18,8 +19,8 @@ void SerialInterface::Read()
 	char* command = (char*)malloc(incomingBytes * sizeof(byte));
 	int readBytes = Serial1.readBytes(command, incomingBytes);
 
-	Serial.print("Mouse received: ");
-	Serial.println(command);
+	//Serial.print("Mouse received: ");
+	//Serial.println(command);
 
 	switch (command[0])
 	{
@@ -33,6 +34,20 @@ void SerialInterface::Read()
 
 	case 'P':
 		Variables::forcedPause = !Variables::forcedPause;
+		break;
+
+	case '+':
+		Mouse::_stepperPulseDelayUs += 1;
+		Mouse::stepperLeft.setMinPulseWidth(Mouse::_stepperPulseDelayUs);
+		Mouse::stepperRight.setMinPulseWidth(Mouse::_stepperPulseDelayUs);
+		Serial.println(Mouse::_stepperPulseDelayUs);
+		break;
+
+	case '-':
+		Mouse::_stepperPulseDelayUs -= 1;
+		Mouse::stepperLeft.setMinPulseWidth(Mouse::_stepperPulseDelayUs);
+		Mouse::stepperRight.setMinPulseWidth(Mouse::_stepperPulseDelayUs);
+		Serial.println(Mouse::_stepperPulseDelayUs);
 		break;
 	}
 

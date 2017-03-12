@@ -39,6 +39,18 @@ public class MouseSerialListener : MonoBehaviour
             serialController.SendSerialMessage("T");
         }
 
+		if (Input.GetKeyDown(KeyCode.Plus) || Input.GetKeyDown(KeyCode.KeypadPlus))
+        {
+            Debug.Log("Incrementing Stepper Pulse");
+            serialController.SendSerialMessage("+");
+        }
+		
+		if (Input.GetKeyDown(KeyCode.Minus) || Input.GetKeyDown(KeyCode.KeypadMinus))
+        {
+            Debug.Log("Decrementing Stepper Pulse");
+            serialController.SendSerialMessage("-");
+        }
+
         //---------------------------------------------------------------------
         // Receive data
         //---------------------------------------------------------------------

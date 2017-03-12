@@ -16,8 +16,8 @@ C:\Users\Pedro\AppData\Local\Temp\VMBuilds\Micromouse\leonardo\Debug\Micromouse.
  C:\Users\Pedro\AppData\Local\Temp\VMBuilds\Micromouse\leonardo\Debug\src/Config.h \
  C:\Users\Pedro\AppData\Local\Temp\VMBuilds\Micromouse\leonardo\Debug\src/Micromouse.h \
  C:\Users\Pedro\AppData\Local\Temp\VMBuilds\Micromouse\leonardo\Debug\src/Mouse.h \
- C:\Program\ Files\ (x86)\Arduino\libraries\Stepper\src/Stepper.h \
- C:\Users\Pedro\AppData\Local\Temp\VMBuilds\Micromouse\leonardo\Debug\src/WallSensors.h \
+ D:\Documents\Arduino\libraries\AccelStepper\src/AccelStepper.h \
  C:\Program\ Files\ (x86)\Arduino\hardware\arduino\avr\cores\arduino/Arduino.h \
+ C:\Users\Pedro\AppData\Local\Temp\VMBuilds\Micromouse\leonardo\Debug\src/WallSensors.h \
  C:\Users\Pedro\AppData\Local\Temp\VMBuilds\Micromouse\leonardo\Debug\src/SerialInterface.h \
  C:\Program\ Files\ (x86)\Microsoft\ Visual\ Studio\ 14.0\Common7\IDE\Extensions\vniiyv0p.vfq\Micro\ Platforms\default\debuggers\VM_DBG/VM_DBG.h
