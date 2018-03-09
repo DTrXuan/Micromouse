@@ -282,7 +282,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   stepTime: 0.25
-  exploreAlgorithm: 2
+  exploreAlgorithm: 1
   runAlgorithm: 0
   sensorDetectionLength: 0.15
 --- !u!114 &1153013494

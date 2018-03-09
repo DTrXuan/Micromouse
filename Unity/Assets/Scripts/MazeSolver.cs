@@ -214,20 +214,32 @@ public class MazeSolver : MonoBehaviour
 				var coord = currentStack.Dequeue();
 
 				// left
-				if (coord.x > 0 && !floodFill[coord.x - 1, coord.y].queued && !cells[coord.x, coord.y].HasWall(Maze.Wall.West)) 
+				if (coord.x > 0 && !floodFill[coord.x - 1, coord.y].queued && !cells[coord.x, coord.y].HasWall(Maze.Wall.West))
+				{
 					nextStack.Enqueue(new Maze.Coord(coord.x - 1, coord.y));
+					floodFill[coord.x - 1, coord.y].queued = true;
+				}
 				
 				// right
-				if (coord.x < columns - 1 && !floodFill[coord.x + 1, coord.y].queued && !cells[coord.x, coord.y].HasWall(Maze.Wall.East)) 
+				if (coord.x < columns - 1 && !floodFill[coord.x + 1, coord.y].queued && !cells[coord.x, coord.y].HasWall(Maze.Wall.East))
+				{
 					nextStack.Enqueue(new Maze.Coord(coord.x + 1, coord.y));
+					floodFill[coord.x + 1, coord.y].queued = true;
+				}
 
 				// down
-				if (coord.y > 0 && !floodFill[coord.x, coord.y-1].queued && !cells[coord.x, coord.y].HasWall(Maze.Wall.South)) 
-					nextStack.Enqueue(new Maze.Coord(coord.x, coord.y-1));
+				if (coord.y > 0 && !floodFill[coord.x, coord.y - 1].queued && !cells[coord.x, coord.y].HasWall(Maze.Wall.South))
+				{
+					nextStack.Enqueue(new Maze.Coord(coord.x, coord.y - 1));
+					floodFill[coord.x, coord.y - 1].queued = true;
+				}
 
 				// up
-				if (coord.y < rows - 1 && !floodFill[coord.x, coord.y+1].queued && !cells[coord.x, coord.y].HasWall(Maze.Wall.North)) 
-					nextStack.Enqueue(new Maze.Coord(coord.x, coord.y+1));
+				if (coord.y < rows - 1 && !floodFill[coord.x, coord.y + 1].queued && !cells[coord.x, coord.y].HasWall(Maze.Wall.North))
+				{
+					nextStack.Enqueue(new Maze.Coord(coord.x, coord.y + 1));
+					floodFill[coord.x, coord.y + 1].queued = true;
+				}
 			}
 
 			currentFloodValue++;
