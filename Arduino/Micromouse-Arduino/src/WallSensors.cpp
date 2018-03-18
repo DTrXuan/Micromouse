@@ -144,10 +144,11 @@ void WallSensors::PrintSensorsSmooth()
 
 bool WallSensors::HasWallAhead()
 {
+	return HasWall(LF) || HasWall(RF);
+}
+
+bool WallSensors::HasWall(LED_INDEX led)
+{
 	int threshold = 50;
-
-	if (sensorValuesSmooth[LED_INDEX_LF] > threshold || sensorValuesSmooth[LED_INDEX_RF] > threshold)
-		return true;
-
-	return false;
+	return sensorValuesSmooth[led] > threshold;
 }

@@ -8,20 +8,22 @@ AccelStepper Mouse::stepperRight(AccelStepper::DRIVER, Pins::STEPPER_RIGHT_STEP,
 float Mouse::_cmToStepsFactor = 0;
 float Mouse::_stepsToCmFactor = 0;
 
-int Mouse::_stepperPulseDelayUs = 3;
+float Mouse::_degreesToMsFactor = 5;
+
+int Mouse::_stepperPulseDelayUs = 5;
 
 void Mouse::Setup()
 {
 	stepperLeft.setMinPulseWidth(_stepperPulseDelayUs);
 	stepperLeft.setPinsInverted(true, false, true);
-	stepperLeft.setAcceleration(50000);
-	stepperLeft.setSpeed(50000);
-	stepperLeft.setMaxSpeed(50000);
+	//stepperLeft.setMaxSpeed(10000);
+	stepperLeft.setAcceleration(100);
+	stepperLeft.setSpeed(10);
 
 	stepperRight.setMinPulseWidth(_stepperPulseDelayUs);
-	stepperRight.setAcceleration(50000);
-	stepperRight.setSpeed(50000);
-	stepperRight.setMaxSpeed(50000);
+	//stepperRight.setMaxSpeed(10000);
+	stepperRight.setAcceleration(100);
+	stepperRight.setSpeed(10);
 }
 
 void Mouse::RunTest()
@@ -29,6 +31,7 @@ void Mouse::RunTest()
 	if(WallSensors::HasWallAhead())
 	{
 		Stop();
+		Rotate(180);
 	}
 	else
 	{
@@ -50,8 +53,19 @@ void Mouse::Stop()
 
 void Mouse::Rotate(int degrees)
 {
-	// TODO(Pedro)
 	return;
+	stepperLeft.setSpeed(stepperLeft.speed() * -1);
+
+	long timeToRotate = degrees * _degreesToMsFactor;
+	long startTime = millis();
+
+	stepperLeft.runSpeed();
+	stepperRight.runSpeed();
+	while (millis() - startTime < timeToRotate);
+
+	Stop();
+	
+	stepperLeft.setSpeed(stepperLeft.speed());
 }
 
 float Mouse::cmToSteps(float cm)

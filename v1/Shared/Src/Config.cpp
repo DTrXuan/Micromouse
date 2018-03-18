@@ -3,11 +3,12 @@
 const int Config::Width = 16;
 const int Config::Height = 16;
 
-const Cell Config::EndCells[] =
+const int Config::EndCellsLength = 4;
+int Config::EndCells[Config::EndCellsLength * 2] =
 {
-	Cell(7, 7),
-	Cell(7, 8),
-	Cell(8, 7),
-	Cell(8, 8),
+	7, 7,
+	7, 8,
+	8, 7,
+	8, 8,
 };
 

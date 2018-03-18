@@ -32,6 +32,26 @@
           <MessageVariable Name="millis()" Index="1" />
         </MessageVariables>
       </BreakPoint>
+      <BreakPoint Index="2" Name="Mouse.cpp, line 64" Id="a15866a0-ad27-4750-9692-4ac3e3b18194" Enabled="1" Message="" MessageTextType="2" PreProcessedMessage="" Condition="" ConditionType="1" CurrentHits="0" File="d:\programming\other projects\micromouse\arduino\micromouse-arduino\src\mouse.cpp" FileLine="64" FileColumn="1" FunctionName="Rotate(int degrees)" FunctionLineOffset="9" FunctionColumnOffset="1" HitCountTarget="1" HitCountType="1" Language="C++" LocationType="3" Tag="&lt;vmbp Id='a15866a0-ad27-4750-9692-4ac3e3b18194'/&gt;" Type="1" ToString="System.__ComObject" BreakWhenHit="1">
+        <Source>57		stepperLeft.setSpeed(stepperLeft.speed() * -1);
+58	
+59		long timeToRotate = degrees * _degreesToMsFactor;
+60		long startTime = millis();
+61	
+62		stepperLeft.runSpeed();
+63		stepperRight.runSpeed();
+--&gt;64		while (millis() - startTime &lt; timeToRotate);
+65	
+66		Stop();
+67		
+68		stepperLeft.setSpeed(stepperLeft.speed());
+69	}
+70	
+71	float Mouse::cmToSteps(float cm)
+72	{
+73		if (_cmToStepsFactor == 0)
+</Source>
+      </BreakPoint>
     </BreakPoints>
   </Program>
 </VisualMicro>

@@ -8,21 +8,24 @@ CPP_SRCS += \
 ../Src/Config.cpp \
 ../Src/Maze.cpp \
 ../Src/Mouse_Hardware.cpp \
-../Src/Mouse_Software.cpp 
+../Src/Mouse_Software.cpp \
+../Src/PathFinder.cpp 
 
 OBJS += \
 ./Src/Cell.o \
 ./Src/Config.o \
 ./Src/Maze.o \
 ./Src/Mouse_Hardware.o \
-./Src/Mouse_Software.o 
+./Src/Mouse_Software.o \
+./Src/PathFinder.o 
 
 CPP_DEPS += \
 ./Src/Cell.d \
 ./Src/Config.d \
 ./Src/Maze.d \
 ./Src/Mouse_Hardware.d \
-./Src/Mouse_Software.d 
+./Src/Mouse_Software.d \
+./Src/PathFinder.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

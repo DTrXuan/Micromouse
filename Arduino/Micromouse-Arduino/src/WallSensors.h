@@ -20,10 +20,13 @@ namespace WallSensors
 	const int RIGHT_DG = A3;
 	const int RIGHT_FT = A0;
 
-	const int LED_INDEX_LF = 3;
-	const int LED_INDEX_DL = 2;
-	const int LED_INDEX_DR = 1;
-	const int LED_INDEX_RF = 0;
+	enum LED_INDEX
+	{
+		RF,
+		DR,
+		DL,
+		LF,
+	};
 
 	const int SensorsPairs[NUM_SENSORS][2] = {
 		{ LED_LF, LEFT_FT },
@@ -55,6 +58,8 @@ namespace WallSensors
 	void PrintSensorsSmooth();
 
 	bool HasWallAhead();
+
+	bool HasWall(LED_INDEX index);
 };
 
 #endif

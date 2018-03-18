@@ -28,12 +28,12 @@
 		<link>
 			<name>Shared_Inc</name>
 			<type>2</type>
-			<location>D:/Programming/Other Projects/Micromouse/v1/Shared/Inc</location>
+			<locationURI>$%7BPARENT-1-PROJECT_LOC%7D/Shared/Inc</locationURI>
 		</link>
 		<link>
 			<name>Shared_Src</name>
 			<type>2</type>
-			<location>D:/Programming/Other Projects/Micromouse/v1/Shared/Src</location>
+			<locationURI>$%7BPARENT-1-PROJECT_LOC%7D/Shared/Src</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>

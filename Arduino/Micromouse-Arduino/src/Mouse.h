@@ -9,6 +9,7 @@ namespace Mouse
 
 	extern float _cmToStepsFactor;
 	extern float _stepsToCmFactor;
+	extern float _degreesToMsFactor;
 
 	extern int _stepperPulseDelayUs;
 

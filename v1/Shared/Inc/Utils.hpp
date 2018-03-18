@@ -1,6 +1,8 @@
 #ifndef UTILS_H
 #define UTILS_H
+
 #include <algorithm>
+#include "windows.h"
 
 class Utils
 {
@@ -13,6 +15,14 @@ public:
 		value = std::min(value, out_max);
 
 		return value;
+	}
+
+	static std::string GetCurrentPath()
+	{
+	    char buffer[MAX_PATH];
+	    GetModuleFileName(NULL, buffer, MAX_PATH);
+	    std::string::size_type pos = std::string(buffer).find_last_of("\\/");
+	    return std::string(buffer).substr(0, pos).append("\\");
 	}
 };
 

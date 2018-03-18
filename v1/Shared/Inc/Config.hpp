@@ -9,7 +9,8 @@ public:
 	static const int Width;
 	static const int Height;
 
-	static const Cell EndCells[];
+	static const int EndCellsLength;
+	static int EndCells[];
 };
 
 #endif
