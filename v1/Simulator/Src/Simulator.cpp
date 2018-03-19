@@ -29,7 +29,6 @@ int mazeWallThickness = 4;
 int mazeOffsetX = 10;
 int mazeOffsetY = 10;
 
-bool _renderFloodfill = false;
 sf::RenderWindow* window;
 tgui::Gui* gui;
 tgui::ComboBox::Ptr mazeListComboBox;
@@ -41,6 +40,9 @@ tgui::Slider::Ptr simulationDelaySlider;
 
 tgui::Label::Ptr smoothCurvesLabel;
 tgui::CheckBox::Ptr smoothCurvesCheckbox;
+
+tgui::Label::Ptr detectedWallsLabel;
+tgui::CheckBox::Ptr detectedWallsCheckbox;
 
 tgui::Label::Ptr heuristicCostsLabel;
 tgui::Label::Ptr straightLineCostLabel;
@@ -61,8 +63,10 @@ const sf::Color darkYellow(128, 128, 0);
 sf::Font profontFont;
 clock_t lastTime;
 
+bool renderFloodfill = false;
 int simulationDelay = 500;
 bool smoothCurves = true;
+bool detectedWalls = true;
 float straightLineCost = 15;
 float diagonalLineCost = 10;
 float fullTurnCost = 20;
@@ -72,11 +76,13 @@ void DrawMaze();
 void DrawPaths();
 void DrawMouse();
 void DrawOled();
+void CalculateCellPath();
 void MazeList_OnItemSelected(std::string selectedItem);
 void StartFloodFill_OnPressed();
 void SaveMaze_OnPressed();
 void SimulationDelay_OnValueChanged();
 void SmoothCurves_OnValueChanged();
+void DetectedWalls_OnValueChanged();
 void StraightLineCost_OnValueChanged();
 void DiagonalLineCost_OnValueChanged();
 void FullTurnCost_OnValueChanged();
@@ -151,8 +157,12 @@ void Update() {
 
 	lastTime = currentTime;
 
-	if (_renderFloodfill)
+	if (renderFloodfill)
+	{
 		Maze::Instance()->StepFloodfill();
+		if(detectedWalls)
+			CalculateCellPath();
+	}
 }
 
 void InitGUI() {
@@ -221,6 +231,21 @@ void InitGUI() {
 	smoothCurvesLabel->setText("Smooth Curves");
 	smoothCurvesLabel->setTextColor(whiteColor);
 	gui->add(smoothCurvesLabel);
+
+	detectedWallsCheckbox = theme->load("CheckBox");
+	detectedWallsCheckbox->setSize(30, 30);
+	detectedWallsCheckbox->setPosition(leftPanelX, leftHeight += 45);
+	if(detectedWalls) detectedWallsCheckbox->check();
+	detectedWallsCheckbox->connect("checked", DetectedWalls_OnValueChanged);
+	detectedWallsCheckbox->connect("unchecked", DetectedWalls_OnValueChanged);
+	gui->add(detectedWallsCheckbox);
+
+	detectedWallsLabel = theme->load("Label");
+	detectedWallsLabel->setSize(200, 20);
+	detectedWallsLabel->setPosition(leftPanelX + 40, leftHeight += 5);
+	detectedWallsLabel->setText("Detected Walls");
+	detectedWallsLabel->setTextColor(whiteColor);
+	gui->add(detectedWallsLabel);
 
 	heuristicCostsLabel = theme->load("Label");
 	heuristicCostsLabel->setSize(200, 20);
@@ -306,7 +331,7 @@ void DrawCells() {
 				window->draw(ground);
 			}
 
-			if (_renderFloodfill) {
+			if (renderFloodfill) {
 				std::stringstream stream;
 				stream << cell->GetFloodfill();
 				std::string floodfillStr = stream.str();
@@ -583,11 +608,11 @@ void CalculateCellPath()
 {
 	Maze* maze = Maze::Instance();
 	SetHeuristicCosts(straightLineCost, diagonalLineCost, fullTurnCost);
-	cellPath = FindPath(maze->GetCell(0, 0), maze->GetCell(7, 7), false);
+	cellPath = FindPath(maze->GetCell(0, 0), maze->GetCell(7, 7), detectedWalls);
 }
 
 void MazeList_OnItemSelected(std::string selectedItem) {
-	_renderFloodfill = false;
+	renderFloodfill = false;
 
 	Maze* maze = Maze::Instance();
 	maze->Reset(false);
@@ -599,7 +624,7 @@ void MazeList_OnItemSelected(std::string selectedItem) {
 }
 
 void StartFloodFill_OnPressed() {
-	_renderFloodfill = true;
+	renderFloodfill = true;
 	Mouse::Instance()->Reset();
 	Maze::Instance()->ResetFloodfill();
 }
@@ -633,6 +658,13 @@ void SimulationDelay_OnValueChanged()
 void SmoothCurves_OnValueChanged()
 {
 	smoothCurves = smoothCurvesCheckbox->isChecked();
+
+	CalculateCellPath();
+}
+
+void DetectedWalls_OnValueChanged()
+{
+	detectedWalls = detectedWallsCheckbox->isChecked();
 
 	CalculateCellPath();
 }
