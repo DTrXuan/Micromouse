@@ -1,0 +1,3 @@
+VCAP1 and VCAP2 pins of the MCU must have a 2.2uF capacitor between the pin and GND
+SCL and SDA pins of the OLED must have the same pull-up voltage as the VCC pin (either 3.3V or 5v for all)
+Check if the BT module works with 3.3V in order to remove all the 5V circuitry

@@ -34,7 +34,7 @@ void DrawDebug()
 void DrawLogo()
 {
 	u8g_SetFont(&u8g, u8g_font_profont10r);
-	//u8g_DrawStr(&u8g,  2, 12, "Bye World!");
+	u8g_DrawStr(&u8g,  2, 12, "Bye World!");
 }
 
 void DrawMaze()

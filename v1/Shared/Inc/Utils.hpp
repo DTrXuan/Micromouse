@@ -2,7 +2,10 @@
 #define UTILS_H
 
 #include <algorithm>
+
+#ifdef MOUSE_SOFTWARE
 #include "windows.h"
+#endif
 
 class Utils
 {
@@ -17,6 +20,7 @@ public:
 		return value;
 	}
 
+#ifdef MOUSE_SOFTWARE
 	static std::string GetCurrentPath()
 	{
 	    char buffer[MAX_PATH];
@@ -24,6 +28,7 @@ public:
 	    std::string::size_type pos = std::string(buffer).find_last_of("\\/");
 	    return std::string(buffer).substr(0, pos).append("\\");
 	}
+#endif
 };
 
 #endif

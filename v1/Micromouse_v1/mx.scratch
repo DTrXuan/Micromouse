@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Project>
-<ProjectName>D:\Programming\Other Projects\Micromouse\v1\Micromouse_v1\\Micromouse_v1</ProjectName>
+<ProjectName>D:\Programming\Other_Projects\Micromouse\v1\Micromouse_v1\\Micromouse_v1</ProjectName>
 <CMSIS>..\Drivers\CMSIS</CMSIS>
 <HAL_Driver>C:\Users\Pedro\STM32Cube\Repository\STM32Cube_FW_F4_V1.18.0\Drivers\CMSIS</HAL_Driver>
 
@@ -23,16 +23,16 @@
 <configs>
   <config>
     <name>Micromouse_v1</name>				
-    <device>STM32F407VGTx</device>		 
+    <device>STM32F405RGTx</device>		 
     <heapSize>0x200</heapSize>
     <stackSize>0x400</stackSize>
     
-    	<board>STM32F4DISCOVERY</board>
+    	<board>custom</board>
 			
     <usedDebug>true</usedDebug>
     	<debugprobe></debugprobe>
     <optimization>6</optimization>
-    <icfloc>0</icfloc>
+    <icfloc>1</icfloc>
     <Adefines>
         <define></define>
     </Adefines>   

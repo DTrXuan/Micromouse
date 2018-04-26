@@ -26,9 +26,13 @@ Mouse::Mouse()
 }
 
 int battery = 0;
+int lastBatteryUpdate = -10000;
 
 void Mouse::Loop()
 {
+	if(GetBattery() < 25)
+	  HAL_GPIO_WritePin(GPIOA, STATUS_Pin, GPIO_PIN_SET);
+
 	Oled::Instance()->Draw(Oled::Page::Debug);
 }
 
@@ -39,13 +43,21 @@ void Mouse::Setup()
 
 int Mouse::GetBattery()
 {
+	int newBatteryUpdate = HAL_GetTick();
+
+	// Update once every 10 seconds.
+	if(newBatteryUpdate - lastBatteryUpdate < 10000)
+		return battery;
+
+	lastBatteryUpdate = newBatteryUpdate;
+
 	HAL_ADC_Start(&hadc1);
 	if(HAL_ADC_PollForConversion(&hadc1, 1000) == HAL_OK)
 	{
         int adc = HAL_ADC_GetValue(&hadc1);
 
         float vdd = 3.3f;
-        int r1 = 20;
+        int r1 = 18;
         int r2 = 10;
         float divider = (float) r2 / (r1 + r2);
         float vInMax = 8.4f;

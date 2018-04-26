@@ -3,8 +3,7 @@
 	<name>Micromouse_v1</name>
 	<comment></comment>
 	<projects>
-		<project>Library</project>
-		<project>u8glib</project>
+		<project>Shared</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
@@ -27,16 +26,4 @@
 		<nature>fr.ac6.mcu.ide.core.MCUProjectNature</nature>
 		<nature>org.eclipse.cdt.core.ccnature</nature>
 	</natures>
-	<linkedResources>
-		<link>
-			<name>Shared_Inc</name>
-			<type>2</type>
-			<location>D:/Programming/Other Projects/Micromouse/v1/Shared/Inc</location>
-		</link>
-		<link>
-			<name>Shared_Src</name>
-			<type>2</type>
-			<location>D:/Programming/Other Projects/Micromouse/v1/Shared/Src</location>
-		</link>
-	</linkedResources>
 </projectDescription>
