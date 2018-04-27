@@ -32,7 +32,7 @@ void Mouse::Setup() {
 
 }
 
-int Mouse::GetBattery() {
+int Mouse::UpdateBatteryPercentage() {
 	return 100;
 }
 
@@ -57,7 +57,7 @@ void Mouse::SetRotation(float rotation) {
 	_rotation = rotation;
 }
 
-void Mouse::TriggerSensors() {
+void Mouse::UpdateWallSensors() {
 	Maze* maze = Maze::Instance();
 
 	Cell* cell = maze->GetCell(_x, _y);

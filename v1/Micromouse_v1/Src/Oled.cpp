@@ -29,6 +29,15 @@ void DrawDebug()
 	char batteryStr[5];
 	snprintf(batteryStr, sizeof(batteryStr), "%d%%", Mouse::Instance()->GetBattery());
 	u8g_DrawStr(&u8g,  50, 12, batteryStr);
+
+	for(int i = 0; i < 4; i++)
+	{
+		int width = 5;
+		int height = Mouse::Instance()->GetWallRead(i) / 30;
+
+		u8g_DrawBox(&u8g, 128 - (i + 1) * (width + 1), 64 - height - 1, width, height);
+	}
+
 }
 
 void DrawLogo()
@@ -72,5 +81,6 @@ void Oled::Draw(Page page)
 
 void Oled::Setup()
 {
-	u8g_InitComFn(&::u8g, &u8g_dev_ssd1306_128x64_i2c, u8g_com_hw_i2c_fn);
+	u8g_InitComFn(&u8g, &u8g_dev_ssd1306_128x64_i2c, u8g_com_hw_i2c_fn);
+	u8g_SetRot180(&u8g);
 }

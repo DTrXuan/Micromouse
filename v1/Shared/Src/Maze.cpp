@@ -217,7 +217,7 @@ void Maze::StepFloodfill()
 	if(targetCells.size() > 0)
 		Mouse::Instance()->SetTargetCells(targetCells);
 
-	Mouse::Instance()->TriggerSensors();
+	Mouse::Instance()->UpdateWallSensors();
 
 	for(int i = 0; i < Config::Width * Config::Height; i++)
 		_cells[i]->SetQueued(false);

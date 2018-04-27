@@ -36,6 +36,10 @@ private:
 	State _state;
 	Target _target;
 	std::vector<Cell*> _targetCells;
+	int _battery;
+	const int _detectionWindowSize = 10;
+	int __detectionValues[4][10];
+	int _currentDetection = 0;
 
 public:
 
@@ -45,7 +49,8 @@ public:
 	void Loop();
 	void Setup();
 
-	int GetBattery();
+	int UpdateBatteryPercentage();
+	void ReadAllSensors();
 
 	float GetPositionX();
 	float GetPositionY();
@@ -54,7 +59,9 @@ public:
 	float GetRotation();
 	void SetRotation(float rotation);
 
-	void TriggerSensors();
+	int GetBattery();
+	void GetWallSensors();
+	int GetWallRead(int wallIndex);
 	void StepMotion();
 
 	void SetState(State state);
